@@ -93,24 +93,30 @@ while True:
                 sleep_until_4 = False
                 closing_time = None
             else:
+                print("Sleeping until 4am")
                 time.sleep(50*60)
                 continue
 
         if closing_time == None:
+            print("---------------------------------------------------------")
+            print("Getting closing time")
             closing_time = get_closing_time()                    
-            
+            print("Closing time is {}".format(closing_time))
             warning_text = generate_warning_text(closing_time)
             warning_audio = gTTS(text=warning_text, lang='en')
             warning_audio.save(warning_msg_fp)  # This saves the warning as an mp3 file
 
         mins_before_close = (closing_time - datetime.now()).total_seconds() / 60.0
+        print("Minutes before library closes: {}".format(mins_before_close))
         if 0 < mins_before_close < 15:
+            print("{} mins left to leave. Playing warning message".format(mins_before_close))
             play_mp3(warning_msg_fp)
 
         elif mins_before_close < 0:
+            print("Past closing time. Sleeping until 4am.")
             os.remove(warning_msg_fp)
             sleep_until_4 = True
-
+        print("Too early to play warning. Sleeping for 5 mins.")
         sleep(5*60) 
 
     except Exception as e:
