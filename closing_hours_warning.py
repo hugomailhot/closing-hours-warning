@@ -93,31 +93,35 @@ while True:
                 sleep_until_4 = False
                 closing_time = None
             else:
-                print("Sleeping until 4am")
-                time.sleep(50*60)
+                print("{} : Sleeping until 4am".format(datetime.now()))
+                sleep(50*60)
                 continue
 
         if closing_time == None:
             print("---------------------------------------------------------")
-            print("Getting closing time")
+            print("{} : Getting closing time".format(datetime.now()))
             closing_time = get_closing_time()                    
-            print("Closing time is {}".format(closing_time))
+            print("{} : Closing time is {}".format(datetime.now(), closing_time))
             warning_text = generate_warning_text(closing_time)
             warning_audio = gTTS(text=warning_text, lang='en')
             warning_audio.save(warning_msg_fp)  # This saves the warning as an mp3 file
 
-        mins_before_close = (closing_time - datetime.now()).total_seconds() / 60.0
-        print("Minutes before library closes: {}".format(mins_before_close))
-        if 0 < mins_before_close < 15:
-            print("{} mins left to leave. Playing warning message".format(mins_before_close))
+        mins_before_close = int( (closing_time - datetime.now()).total_seconds() / 60.0 )
+        print("{} : Minutes before library closes: {}".format(datetime.now(), mins_before_close))
+        if 0 < mins_before_close < 17:
+            print("{} : {} mins left to leave. Playing warning message".format(datetime.now(),
+                                                                               mins_before_close))
             play_mp3(warning_msg_fp)
+            sleep(5*60)
 
         elif mins_before_close < 0:
-            print("Past closing time. Sleeping until 4am.")
+            print("{} : Past closing time. Sleeping until 4am.".format(datetime.now()))
             os.remove(warning_msg_fp)
             sleep_until_4 = True
-        print("Too early to play warning. Sleeping for 5 mins.")
-        sleep(5*60) 
+
+        else:
+            print("Too early to play warning. Sleeping until 15 mins before close.")
+            sleep(60 * (mins_before_close - 15) ) 
 
     except Exception as e:
         # TODO: send email to admin so they can fix the problem
